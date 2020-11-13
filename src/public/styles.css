@@ -33,3 +33,7 @@ body {
 	color: red;
 	font-weight: red;
 }
+
+.exclude-column {
+	display: flex;
+}

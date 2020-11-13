@@ -37,7 +37,7 @@ module.exports = {
 	})],
 
 	resolve: {
-		extensions: [".json", ".ts", ".js", ".css", ".scss"],
+		extensions: [".json", ".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
 		plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
 	},
 
