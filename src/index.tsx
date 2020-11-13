@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Button, Card } from "antd";
+import { Anchor, Button, Card } from "antd";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";
@@ -10,7 +10,7 @@ import Exclusions from "components/Exclusions";
 import Results from "components/Results";
 import { playerIsEmpty } from "helpers";
 
-const getPairId = (() => {
+export const getPairId = (() => {
 	let pairId = 0;
 	return () => {
 		return pairId++;
@@ -25,9 +25,26 @@ const getPlayerId = (() => {
 })();
 
 function App() {
-	const [players, setPlayers] = useState([] as IPlayer[]);
+	const [players, setPlayers] = useState([
+		{
+			name: "A",
+			email: "a@gmail.com",
+			id: getPlayerId(),
+		},
+		{
+			name: "B",
+			email: "b@gmail.com",
+			id: getPlayerId(),
+		},
+		,
+	] as IPlayer[]);
 	const [exclusions, setExclusions] = useState([] as IPair[]);
-	const [showResults, setShowResults] = useState(false);
+	const [showResults, setShowResults] = useState(true);
+	const [showAll, setShowAll] = useState(false);
+
+	const toggleShowAll = () => {
+		setShowAll(!showAll);
+	};
 
 	const addExclusion = (a: number, b: number) => {
 		let exclusion = {
@@ -99,8 +116,6 @@ function App() {
 		}
 	}, [players]);
 
-	console.log(players);
-
 	return (
 		<>
 			<Layout>
@@ -110,25 +125,38 @@ function App() {
 				<Content>
 					{showResults ? (
 						<>
-							<Results players={players} exclusions={exclusions} />
-							<Button onClick={toggleShowResults}>Edit</Button>
+							<Card>
+								<Button onClick={toggleShowResults}>Edit</Button>
+								<Button onClick={toggleShowAll}>
+									{showAll ? "Hide all" : "Show all"}
+								</Button>
+							</Card>
+							<Results
+								players={players}
+								exclusions={exclusions}
+								showAll={showAll}
+							/>
 						</>
 					) : (
 						<>
-							<Card title="Exclusions">
-								<Exclusions
-									exclusions={exclusions}
-									players={players}
-									updatePlayer={updatePlayer}
-									removePlayer={removePlayer}
-									addExclusion={addExclusion}
-									removeExclusion={removeExclusion}
-								/>
+							<Card>
+								<Button
+									className="floating-button"
+									disabled={players.length < 3}
+									onClick={toggleShowResults}
+								>
+									Calculate
+								</Button>
 							</Card>
 
-							<Button disabled={players.length < 3} onClick={toggleShowResults}>
-								Calculate
-							</Button>
+							<Exclusions
+								exclusions={exclusions}
+								players={players}
+								updatePlayer={updatePlayer}
+								removePlayer={removePlayer}
+								addExclusion={addExclusion}
+								removeExclusion={removeExclusion}
+							/>
 						</>
 					)}
 				</Content>

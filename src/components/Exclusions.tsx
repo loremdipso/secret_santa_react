@@ -20,10 +20,11 @@ export default function Exclusions({
 	addExclusion: (a: number, b: number) => any;
 	removeExclusion: (a: number, b: number) => any;
 }) {
+	const width = 120;
 	return (
 		<Table dataSource={players} rowKey="id" pagination={false}>
 			<Column
-				width="120px"
+				width={width}
 				title="Player"
 				render={(player: IPlayer) => (
 					<div key={player.id}>
@@ -59,11 +60,13 @@ export default function Exclusions({
 
 			<Column
 				title=""
-				width="100px"
+				width={width}
 				align="right"
 				render={(player, _, index) =>
 					index < players.length - 1 ? (
-						<Button onClick={() => removePlayer(player.id)}>Remove</Button>
+						<Button onClick={() => removePlayer(player.id)} type="primary">
+							Remove
+						</Button>
 					) : (
 						""
 					)
