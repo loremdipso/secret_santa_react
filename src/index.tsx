@@ -27,7 +27,6 @@ const getPlayerId = (() => {
 function App() {
 	const [players, setPlayers] = useState([] as IPlayer[]);
 	const [exclusions, setExclusions] = useState([] as IPair[]);
-	const [pairs] = useState([] as IPair[]);
 	const [showResults, setShowResults] = useState(false);
 
 	const addExclusion = (a: number, b: number) => {
@@ -71,30 +70,6 @@ function App() {
 		setShowResults(!showResults);
 	};
 
-	useEffect(() => {
-		let players = [
-			{
-				name: "Player 1",
-				email: "",
-				id: getPlayerId(),
-			},
-			{
-				name: "Player 2",
-				email: "",
-				id: getPlayerId(),
-			},
-		];
-
-		setPlayers(players);
-		setExclusions([
-			{
-				a: players[0].id,
-				b: players[1].id,
-				id: getPairId(),
-			},
-		]);
-	}, []);
-
 	const updatePlayer = (updatedPlayer: IPlayer) => {
 		setPlayers(
 			players.map((player) =>
@@ -124,6 +99,8 @@ function App() {
 		}
 	}, [players]);
 
+	console.log(players);
+
 	return (
 		<>
 			<Layout>
@@ -133,7 +110,7 @@ function App() {
 				<Content>
 					{showResults ? (
 						<>
-							<Results players={players} pairs={pairs} />
+							<Results players={players} exclusions={exclusions} />
 							<Button onClick={toggleShowResults}>Edit</Button>
 						</>
 					) : (
@@ -149,10 +126,7 @@ function App() {
 								/>
 							</Card>
 
-							<Button
-								disabled={players.length === 0}
-								onClick={toggleShowResults}
-							>
+							<Button disabled={players.length < 3} onClick={toggleShowResults}>
 								Calculate
 							</Button>
 						</>

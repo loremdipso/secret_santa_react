@@ -20,10 +20,6 @@ export default function Exclusions({
 	addExclusion: (a: number, b: number) => any;
 	removeExclusion: (a: number, b: number) => any;
 }) {
-	if (exclusions.length === 0) {
-		return null;
-	}
-
 	return (
 		<Table dataSource={players} rowKey="id" pagination={false}>
 			<Column
@@ -37,9 +33,14 @@ export default function Exclusions({
 			/>
 
 			<Column
-				title="Exclude"
+				title="Excluding"
 				render={(player: IPlayer) => (
 					<div key={player.id} className="exclude-column">
+						<ShowDropdown
+							players={findPlayers(players, exclusions, player.id)}
+							onChange={(id) => addExclusion(player.id, id)}
+						/>
+
 						{findExclusionsForPlayer(players, exclusions, player.id).map(
 							(id) => (
 								<Button
@@ -52,11 +53,6 @@ export default function Exclusions({
 								</Button>
 							)
 						)}
-
-						<ShowDropdown
-							players={findPlayers(players, exclusions, player.id)}
-							onChange={(id) => addExclusion(player.id, id)}
-						/>
 					</div>
 				)}
 			/>
@@ -99,7 +95,7 @@ function ShowDropdown({
 	return (
 		<Dropdown overlay={menu} disabled={disabled}>
 			<Button className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-				Add
+				Exclude
 			</Button>
 		</Dropdown>
 	);
