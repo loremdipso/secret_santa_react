@@ -27,7 +27,7 @@ const getPlayerId = (() => {
 function App() {
 	const [players, setPlayers] = useState([
 		{
-			name: "A",
+			name: "C&gmsil.com;drop table",
 			email: "a@gmail.com",
 			id: getPlayerId(),
 		},
@@ -42,20 +42,9 @@ function App() {
 			id: getPlayerId(),
 		},
 	] as IPlayer[]);
-	const [exclusions, setExclusions] = useState([
-		{
-			a: 1,
-			b: 2,
-			id: getPairId(),
-		},
-	] as IPair[]);
+	const [exclusions, setExclusions] = useState([] as IPair[]);
 
 	const [showResults, setShowResults] = useState(true);
-	const [showAll, setShowAll] = useState(false);
-
-	const toggleShowAll = () => {
-		setShowAll(!showAll);
-	};
 
 	const addExclusion = (a: number, b: number) => {
 		let exclusion = {
@@ -64,6 +53,10 @@ function App() {
 			id: getPairId(),
 		};
 		setExclusions([...exclusions, exclusion]);
+	};
+
+	const toggleShowResults = () => {
+		setShowResults(!showResults);
 	};
 
 	const removePlayer = (id: number) => {
@@ -91,11 +84,6 @@ function App() {
 					!(exclusion.a === b && exclusion.b === a)
 			)
 		);
-	};
-
-	const toggleShowResults = () => {
-		// TODO: calculate results
-		setShowResults(!showResults);
 	};
 
 	const updatePlayer = (updatedPlayer: IPlayer) => {
@@ -135,19 +123,11 @@ function App() {
 				</Header>
 				<Content>
 					{showResults ? (
-						<>
-							<Card>
-								<Button onClick={toggleShowResults}>Edit</Button>
-								<Button onClick={toggleShowAll}>
-									{showAll ? "Hide all" : "Show all"}
-								</Button>
-							</Card>
-							<Results
-								players={players}
-								exclusions={exclusions}
-								showAll={showAll}
-							/>
-						</>
+						<Results
+							players={players}
+							exclusions={exclusions}
+							toggleShowResults={toggleShowResults}
+						/>
 					) : (
 						<>
 							<Card>

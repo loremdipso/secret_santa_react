@@ -1,5 +1,5 @@
 import { getPairId } from "../index";
-import { Card, Space, Table } from "antd";
+import { Button, Card, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
 import { findPlayer, playerIsEmpty } from "helpers";
 import { IPair, IPlayer } from "interfaces";
@@ -14,14 +14,19 @@ interface IResultPair extends IPair {
 export default function Results({
 	players,
 	exclusions,
-	showAll,
+	toggleShowResults,
 }: {
 	players: IPlayer[];
 	exclusions: IPair[];
-	showAll: boolean;
+	toggleShowResults: Function;
 }) {
 	const [failed, setFailed] = useState(false);
 	const [matchups, setMatchups] = useState([] as IResultPair[]);
+	const [showAll, setShowAll] = useState(false);
+
+	const toggleShowAll = () => {
+		setShowAll(!showAll);
+	};
 
 	useEffect(() => {
 		let matchups = getMatchups(
@@ -37,79 +42,102 @@ export default function Results({
 			<span>Failed :(</span>
 		</Card>
 	) : (
-		<Table dataSource={matchups} pagination={false} rowKey="id">
-			<Column
-				title="Gifter"
-				width="50%"
-				render={(pair: IResultPair) => {
-					let player = findPlayer(players, pair.a);
-					return (
-						<div key={player.id}>
-							<div>{player.name}</div>
-						</div>
-					);
-				}}
-			/>
+		<>
+			<Card>
+				<Button
+					onClick={() => {
+						toggleShowResults();
+					}}
+				>
+					Edit
+				</Button>
+				<Button onClick={toggleShowAll}>
+					{showAll ? "Hide all" : "Show all"}
+				</Button>
 
-			<Column
-				title="Giftee"
-				width="50%"
-				render={(pair: IResultPair) => (
-					<HiddenField
-						player={findPlayer(players, pair.b)}
-						show={showAll || pair.visible}
-					/>
-				)}
-			/>
+				<Button
+					onClick={() => {
+						for (let matchup of matchups) {
+							sendEmail(players, matchup);
+						}
+					}}
+				>
+					Email All
+				</Button>
+			</Card>
+			<Table dataSource={matchups} pagination={false} rowKey="id">
+				<Column
+					title="Gifter"
+					width="50%"
+					render={(pair: IResultPair) => {
+						let player = findPlayer(players, pair.a);
+						return (
+							<div key={player.id}>
+								<div>{player.name}</div>
+							</div>
+						);
+					}}
+				/>
 
-			<Column
-				title=""
-				align="right"
-				width="120px"
-				render={(pair: IResultPair) => (
-					<Space>
-						{showAll ? null : (
-							<a
-								onClick={() =>
-									helper(matchups, setMatchups, pair, {
-										...pair,
-										visible: !pair.visible,
-									})
-								}
-							>
-								{pair.visible ? "Hide" : "Show"}
-							</a>
-						)}
+				<Column
+					title="Giftee"
+					width="50%"
+					render={(pair: IResultPair) => (
+						<HiddenField
+							player={findPlayer(players, pair.b)}
+							show={showAll || pair.visible}
+						/>
+					)}
+				/>
 
-						{/* TODO: this */}
-						<a>Email</a>
-					</Space>
-				)}
-			/>
+				<Column
+					title=""
+					align="right"
+					width="120px"
+					render={(pair: IResultPair) => (
+						<Space>
+							{showAll ? null : (
+								<a
+									onClick={() =>
+										helper(matchups, setMatchups, pair, {
+											...pair,
+											visible: !pair.visible,
+										})
+									}
+								>
+									{pair.visible ? "Hide" : "Show"}
+								</a>
+							)}
 
-			{/* <Column
-				title=""
-				align="right"
-				render={(player, _, index) =>
-					index < players.length - 1 ? (
-						<Button type="primary">Remove</Button>
-					) : (
-						""
-					)
-				}
-			/> */}
-		</Table>
+							<a onClick={() => sendEmail(players, pair)}>Email</a>
+						</Space>
+					)}
+				/>
+			</Table>
+		</>
 	);
 }
 
-function HiddenField({ player, show }: { player: IPlayer; show: boolean }) {
-	// const [shouldShow, setShouldShow] = useState(false);
-	// useEffect(() => {
-	// 	if (shouldShow !== show) {
-	// 		setShouldShow(show);
-	// 	}
-	// }, [show]);
+function sendEmail(players: IPlayer[], pair: IResultPair) {
+	let a = findPlayer(players, pair.a);
+	let b = findPlayer(players, pair.b);
+	let email = encodeURIComponent(a.email);
+	let subject = encodeURIComponent("Secret Santa");
+	let body = encodeURIComponent(getBody(b.name, b.address));
 
+	let message = `mailto:${email}?subject=${subject}&body=${body}`;
+	window.location.href = message;
+}
+
+function getBody(recipientName: string, recipientAddress?: string) {
+	let body = `Give your gift to ${recipientName}, or else!`;
+	if (recipientAddress) {
+		body += `\nThey live at: ${recipientAddress}`;
+	}
+	return body;
+}
+
+function HiddenField({ player, show }: { player: IPlayer; show: boolean }) {
 	return (
 		<div key={player.id}>
 			{show ? <span>{player.name}</span> : <span>######</span>}

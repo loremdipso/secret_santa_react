@@ -26,6 +26,13 @@ export default function Player({
 					updatePlayer({ ...player, email: event.target.value })
 				}
 			/>
+			<Input
+				placeholder="address (optional)"
+				value={player.address}
+				onChange={(event) =>
+					updatePlayer({ ...player, address: event.target.value })
+				}
+			/>
 			{/* </Space> */}
 		</div>
 	);
