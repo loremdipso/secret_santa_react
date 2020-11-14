@@ -36,9 +36,20 @@ function App() {
 			email: "b@gmail.com",
 			id: getPlayerId(),
 		},
-		,
+		{
+			name: "C",
+			email: "b@gmail.com",
+			id: getPlayerId(),
+		},
 	] as IPlayer[]);
-	const [exclusions, setExclusions] = useState([] as IPair[]);
+	const [exclusions, setExclusions] = useState([
+		{
+			a: 1,
+			b: 2,
+			id: getPairId(),
+		},
+	] as IPair[]);
+
 	const [showResults, setShowResults] = useState(true);
 	const [showAll, setShowAll] = useState(false);
 

@@ -1,6 +1,10 @@
 import { Button, Dropdown, Menu, Select, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
-import { findExclusionsForPlayer, findPlayers, findPlayer } from "helpers";
+import {
+	findExclusionsForPlayer,
+	findPlayersForExclusionDropdown,
+	findPlayer,
+} from "helpers";
 import { IPair, IPlayer } from "interfaces";
 import React from "react";
 import Player from "./Player";
@@ -38,7 +42,11 @@ export default function Exclusions({
 				render={(player: IPlayer) => (
 					<div key={player.id} className="exclude-column">
 						<ShowDropdown
-							players={findPlayers(players, exclusions, player.id)}
+							players={findPlayersForExclusionDropdown(
+								players,
+								exclusions,
+								player.id
+							)}
 							onChange={(id) => addExclusion(player.id, id)}
 						/>
 
