@@ -25,33 +25,12 @@ const getPlayerId = (() => {
 })();
 
 function App() {
-	const [players, setPlayers] = useState([
-		{
-			name: "C&gmsil.com;drop table",
-			email: "a@gmail.com",
-			id: getPlayerId(),
-		},
-		{
-			name: "B",
-			email: "b@gmail.com",
-			id: getPlayerId(),
-		},
-		{
-			name: "C",
-			email: "b@gmail.com",
-			id: getPlayerId(),
-		},
-	] as IPlayer[]);
+	const [players, setPlayers] = useState([] as IPlayer[]);
 	const [exclusions, setExclusions] = useState([] as IPair[]);
-
-	const [showResults, setShowResults] = useState(true);
+	const [showResults, setShowResults] = useState(false);
 
 	const addExclusion = (a: number, b: number) => {
-		let exclusion = {
-			a,
-			b,
-			id: getPairId(),
-		};
+		let exclusion = { a, b, id: getPairId() };
 		setExclusions([...exclusions, exclusion]);
 	};
 
@@ -100,12 +79,12 @@ function App() {
 		for (let i = players.length - 2; i >= 0; i--) {
 			let player = players[i];
 			if (playerIsEmpty(player)) {
-				// playersToRemove.push(player.id);
+				playersToRemove.push(player.id);
 			}
 		}
 
 		if (playersToRemove.length > 0) {
-			// removePlayers(playersToRemove);
+			removePlayers(playersToRemove);
 			return; // return now since we can only do one operation at a time
 		}
 

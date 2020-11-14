@@ -39,7 +39,17 @@ export default function Results({
 
 	return failed ? (
 		<Card>
-			<span>Failed :(</span>
+			<Button
+				onClick={() => {
+					toggleShowResults();
+				}}
+			>
+				Edit
+			</Button>
+			<Card>
+				Sorry, I couldn't find any valid arrangements. You'll need to either
+				remove some restrictions or add more people to the pool.
+			</Card>
 		</Card>
 	) : (
 		<>
