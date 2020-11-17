@@ -2,7 +2,7 @@ import { DownOutlined } from "@ant-design/icons";
 import { Button, Card, Dropdown, Input, Menu, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
 import { findPlayer, pairHasEmail, playerIsEmpty } from "helpers";
-import { IPair, IPlayer } from "interfaces";
+import { IImportFile, IPair, IPlayer } from "interfaces";
 import React, { useEffect, useState } from "react";
 import shuffle from "shuffle-array";
 import { validateLocaleAndSetLanguage } from "typescript";
@@ -48,8 +48,19 @@ export default function Results({
 			});
 			j.download = `secret_santa_${dateString}.json`;
 
-			let contents = {
+			let contents: IImportFile = {
 				version: 1.0,
+				previous_matchups: matchups
+					.map((pair) => {
+						let a = findPlayer(players, pair.a);
+						let b = findPlayer(players, pair.b);
+						if (a && b) {
+							return [a.name, b.name];
+						} else {
+							return null;
+						}
+					})
+					.filter((pair) => pair),
 				people: players.filter((player) => !playerIsEmpty(player)),
 				bad_pairs: exclusions
 					.map((pair) => {

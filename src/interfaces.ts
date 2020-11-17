@@ -17,4 +17,5 @@ export interface IImportFile {
 	version: number,
 	people: IPlayer[],
 	bad_pairs: string[][]
+	previous_matchups: string[][]
 }
