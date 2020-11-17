@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Input, Space } from "antd";
+import { Input } from "antd";
 import { IPlayer } from "../interfaces";
 
 export default function Player({
@@ -11,7 +11,6 @@ export default function Player({
 }) {
 	return (
 		<div style={{ width: "200px" }}>
-			{/* <Space> */}
 			<Input
 				placeholder="name"
 				value={player.name}
@@ -33,7 +32,6 @@ export default function Player({
 					updatePlayer({ ...player, address: event.target.value })
 				}
 			/>
-			{/* </Space> */}
 		</div>
 	);
 }

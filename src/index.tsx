@@ -1,21 +1,22 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Anchor, Button, Card, notification, Space } from "antd";
+import { Button, Card, Space } from "antd";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";
-import { IImportFile, IPair, IPlayer } from "interfaces";
+import { IPair, IPlayer } from "interfaces";
 import Exclusions from "components/Exclusions";
 import Results from "components/Results";
-import { findPlayerByName, playerIsEmpty } from "helpers";
+import { playerIsEmpty } from "helpers";
 import Importer from "components/Importer";
-import { getPairId, getPlayerId, showErrorToast, showToast } from "utils";
+import { getPairId, getPlayerId } from "utils";
 
 function App() {
 	const [players, setPlayers] = useState([] as IPlayer[]);
 	const [exclusions, setExclusions] = useState([] as IPair[]);
 	const [showResults, setShowResults] = useState(false);
+	const [subject, setSubject] = useState("Secret Santa");
 
 	const addExclusion = (a: number, b: number) => {
 		let exclusion = { a, b, id: getPairId() };
@@ -99,6 +100,8 @@ function App() {
 							players={players}
 							exclusions={exclusions}
 							toggleShowResults={toggleShowResults}
+							subject={subject}
+							setSubject={setSubject}
 						/>
 					) : (
 						<>

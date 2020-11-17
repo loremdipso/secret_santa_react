@@ -1,5 +1,5 @@
 import { DownOutlined } from "@ant-design/icons";
-import { Button, Card, Dropdown, Menu, Space, Table } from "antd";
+import { Button, Card, Dropdown, Input, Menu, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
 import { findPlayer, pairHasEmail, playerIsEmpty } from "helpers";
 import { IPair, IPlayer } from "interfaces";
@@ -16,10 +16,14 @@ export default function Results({
 	players,
 	exclusions,
 	toggleShowResults,
+	subject,
+	setSubject,
 }: {
 	players: IPlayer[];
 	exclusions: IPair[];
 	toggleShowResults: Function;
+	subject: string;
+	setSubject: (subject: string) => any;
 }) {
 	const [failed, setFailed] = useState(false);
 	const [matchups, setMatchups] = useState([] as IResultPair[]);
@@ -75,10 +79,10 @@ export default function Results({
 				<a
 					onClick={() => {
 						if (pair) {
-							sendEmail(players, pair, EmailTarget.gmail);
+							sendEmail(players, pair, subject, EmailTarget.gmail);
 						} else {
 							for (let matchup of matchups) {
-								sendEmail(players, matchup, EmailTarget.gmail);
+								sendEmail(players, matchup, subject, EmailTarget.gmail);
 							}
 						}
 					}}
@@ -90,10 +94,10 @@ export default function Results({
 				<a
 					onClick={() => {
 						if (pair) {
-							sendEmail(players, pair, EmailTarget.local);
+							sendEmail(players, pair, subject, EmailTarget.local);
 						} else {
 							for (let matchup of matchups) {
-								sendEmail(players, matchup, EmailTarget.local);
+								sendEmail(players, matchup, subject, EmailTarget.local);
 							}
 						}
 					}}
@@ -136,6 +140,13 @@ export default function Results({
 	) : (
 		<>
 			<Card>
+				<Input
+					style={{ display: "block", marginBottom: "10px" }}
+					addonBefore={<span>Subject line for emails:</span>}
+					value={subject}
+					onChange={(event) => setSubject(event.target.value)}
+				/>
+
 				<Space>
 					<Button
 						onClick={() => {
@@ -232,11 +243,16 @@ enum EmailTarget {
 	gmail,
 	local,
 }
-function sendEmail(players: IPlayer[], pair: IResultPair, target: EmailTarget) {
+function sendEmail(
+	players: IPlayer[],
+	pair: IResultPair,
+	subject: string,
+	target: EmailTarget
+) {
 	let a = findPlayer(players, pair.a);
 	let b = findPlayer(players, pair.b);
 	let email = encodeURIComponent(a.email);
-	let subject = encodeURIComponent("Secret Santa");
+	subject = encodeURIComponent(subject);
 	let body = encodeURIComponent(getBody(b.name, b.address));
 
 	switch (target) {
