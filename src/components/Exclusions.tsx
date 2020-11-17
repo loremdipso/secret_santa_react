@@ -13,6 +13,7 @@ import Player from "./Player";
 export default function Exclusions({
 	players,
 	exclusions,
+	oneWay,
 	removePlayer,
 	updatePlayer,
 	addExclusion,
@@ -20,6 +21,7 @@ export default function Exclusions({
 }: {
 	exclusions: IPair[];
 	players: IPlayer[];
+	oneWay: boolean;
 	updatePlayer: (player: IPlayer) => any;
 	removePlayer: (id: number) => any;
 	addExclusion: (a: number, b: number) => any;
@@ -46,23 +48,27 @@ export default function Exclusions({
 							players={findPlayersForExclusionDropdown(
 								players,
 								exclusions,
-								player.id
+								player.id,
+								oneWay
 							)}
 							onChange={(id) => addExclusion(player.id, id)}
 						/>
 
-						{findExclusionsForPlayer(players, exclusions, player.id).map(
-							(id) => (
-								<Button
-									key={id}
-									onClick={() => {
-										removeExclusion(player.id, id);
-									}}
-								>
-									{findPlayer(players, id).name}
-								</Button>
-							)
-						)}
+						{findExclusionsForPlayer(
+							players,
+							exclusions,
+							player.id,
+							oneWay
+						).map((id) => (
+							<Button
+								key={id}
+								onClick={() => {
+									removeExclusion(player.id, id);
+								}}
+							>
+								{findPlayer(players, id).name}
+							</Button>
+						))}
 					</Space>
 				)}
 			/>

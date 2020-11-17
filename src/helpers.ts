@@ -1,11 +1,11 @@
 import { IPair, IPlayer } from "interfaces";
 
-export function findExclusionsForPlayer(players: IPlayer[], exclusions: IPair[], id: number): number[] {
+export function findExclusionsForPlayer(players: IPlayer[], exclusions: IPair[], id: number, oneWay: boolean): number[] {
 	const toExclude = [];
 	for (const exclusion of exclusions) {
 		if (exclusion.a === id) {
 			toExclude.push(exclusion.b);
-		} else if (exclusion.b === id) {
+		} else if (!oneWay && exclusion.b === id) {
 			toExclude.push(exclusion.a);
 		}
 	}
@@ -23,12 +23,12 @@ export function findPlayer(players: IPlayer[], id: number) {
 	return players.find((player) => player.id === id);
 }
 
-export function findPlayersForExclusionDropdown(players: IPlayer[], exclusions: IPair[], id: number) {
+export function findPlayersForExclusionDropdown(players: IPlayer[], exclusions: IPair[], id: number, oneWay: boolean) {
 	if (playerIsEmpty(findPlayer(players, id))) {
 		return [];
 	}
 
-	let playerExclusions = findExclusionsForPlayer(players, exclusions, id);
+	let playerExclusions = findExclusionsForPlayer(players, exclusions, id, oneWay);
 	let result = players.filter((player) => {
 		if (player.id === id) {
 			return false;

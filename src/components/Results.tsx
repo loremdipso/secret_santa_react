@@ -18,12 +18,14 @@ export default function Results({
 	toggleShowResults,
 	subject,
 	setSubject,
+	oneWay,
 }: {
 	players: IPlayer[];
 	exclusions: IPair[];
 	toggleShowResults: Function;
 	subject: string;
 	setSubject: (subject: string) => any;
+	oneWay: boolean;
 }) {
 	const [failed, setFailed] = useState(false);
 	const [matchups, setMatchups] = useState([] as IResultPair[]);
@@ -54,12 +56,20 @@ export default function Results({
 						let a = findPlayer(players, pair.a);
 						let b = findPlayer(players, pair.b);
 						if (a && b) {
-							return [a.name, b.name];
+							if (oneWay) {
+								return [[a.name, b.name]];
+							} else {
+								return [
+									[a.name, b.name],
+									[b.name, a.name],
+								];
+							}
 						} else {
 							return null;
 						}
 					})
-					.filter((pair) => pair),
+					.filter((pair) => pair)
+					.flat(),
 			};
 
 			j.href = URL.createObjectURL(
@@ -111,7 +121,8 @@ export default function Results({
 	useEffect(() => {
 		let matchups = getMatchups(
 			players.filter((player) => !playerIsEmpty(player)),
-			exclusions
+			exclusions,
+			oneWay
 		);
 		setMatchups(matchups);
 		setFailed(matchups.length === 0);
@@ -298,7 +309,11 @@ function helper<T>(
 	setter(arr.map((el) => (el === element ? newElement : el)));
 }
 
-function getMatchups(players: IPlayer[], exclusions: IPair[]): IResultPair[] {
+function getMatchups(
+	players: IPlayer[],
+	exclusions: IPair[],
+	oneWay: boolean
+): IResultPair[] {
 	if (players.length < 2) {
 		return [];
 	}
@@ -307,7 +322,7 @@ function getMatchups(players: IPlayer[], exclusions: IPair[]): IResultPair[] {
 	shuffle(permutations);
 	for (const tempPlayers of permutations) {
 		let matchups = playersToMatchups(tempPlayers);
-		if (validMatchups(matchups, exclusions)) {
+		if (validMatchups(matchups, exclusions, oneWay)) {
 			return matchups.sort((a, b) => a.a - b.a);
 		}
 	}
@@ -334,12 +349,16 @@ function playersToMatchups(players: IPlayer[]): IResultPair[] {
 	return matchups;
 }
 
-function validMatchups(matchups: IResultPair[], exclusions: IPair[]) {
+function validMatchups(
+	matchups: IResultPair[],
+	exclusions: IPair[],
+	oneWay: boolean
+) {
 	for (let matchup of matchups) {
 		let exclusion = exclusions.find(
 			(exclusion) =>
 				(matchup.a === exclusion.a && matchup.b === exclusion.b) ||
-				(matchup.a === exclusion.b && matchup.b === exclusion.a)
+				(!oneWay && matchup.a === exclusion.b && matchup.b === exclusion.a)
 		);
 
 		if (exclusion) {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Button, Card, Space } from "antd";
+import { Button, Card, Space, Switch } from "antd";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";
@@ -17,6 +17,7 @@ function App() {
 	const [exclusions, setExclusions] = useState([] as IPair[]);
 	const [showResults, setShowResults] = useState(false);
 	const [subject, setSubject] = useState("Secret Santa");
+	const [oneWay, setOneWay] = useState(true);
 
 	const addExclusion = (a: number, b: number) => {
 		let exclusion = { a, b, id: getPairId() };
@@ -102,6 +103,7 @@ function App() {
 							toggleShowResults={toggleShowResults}
 							subject={subject}
 							setSubject={setSubject}
+							oneWay={oneWay}
 						/>
 					) : (
 						<>
@@ -115,6 +117,13 @@ function App() {
 									>
 										Calculate
 									</Button>
+
+									<Switch
+										onChange={() => setOneWay(!oneWay)}
+										checked={oneWay}
+										checkedChildren={<span>Exclude is one-way</span>}
+										unCheckedChildren={<span>Exclude goes both ways</span>}
+									/>
 								</Space>
 							</Card>
 
@@ -125,6 +134,7 @@ function App() {
 								removePlayer={removePlayer}
 								addExclusion={addExclusion}
 								removeExclusion={removeExclusion}
+								oneWay={oneWay}
 							/>
 						</>
 					)}
