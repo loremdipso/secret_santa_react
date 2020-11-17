@@ -270,7 +270,7 @@ function sendEmail(
 		case EmailTarget.local:
 			{
 				let url = `mailto:${email}?subject=${subject}&body=${body}`;
-				window.location.href = url;
+				(window.location as any).href = url;
 			}
 			break;
 		case EmailTarget.gmail:
@@ -318,16 +318,19 @@ function getMatchups(
 		return [];
 	}
 
-	let permutations = getPermutations(players);
-	shuffle(permutations);
-	for (const tempPlayers of permutations) {
-		let matchups = playersToMatchups(tempPlayers);
-		if (validMatchups(matchups, exclusions, oneWay)) {
-			return matchups.sort((a, b) => a.a - b.a);
-		}
-	}
+	shuffle([...players]);
+	let tempPlayers =
+		getFirstPermutation(players, (tempPlayers: IPlayer[]) => {
+			let matchups = playersToMatchups(tempPlayers);
+			return validMatchups(matchups, exclusions, oneWay);
+		}) || [];
 
-	return [];
+	if (tempPlayers && tempPlayers.length > 1) {
+		let matchups = playersToMatchups(tempPlayers);
+		return matchups.sort((a, b) => a.a - b.a);
+	} else {
+		return [];
+	}
 }
 
 function playersToMatchups(players: IPlayer[]): IResultPair[] {
@@ -340,11 +343,13 @@ function playersToMatchups(players: IPlayer[]): IResultPair[] {
 		});
 	}
 
-	matchups.push({
-		a: players[players.length - 1].id,
-		b: players[0].id,
-		id: getPairId(),
-	});
+	if (players.length > 1) {
+		matchups.push({
+			a: players[players.length - 1].id,
+			b: players[0].id,
+			id: getPairId(),
+		});
+	}
 
 	return matchups;
 }
@@ -369,16 +374,29 @@ function validMatchups(
 }
 
 // thanks SO: https://stackoverflow.com/a/60136724/13707438
-function getPermutations<T>(arr: T[], perms: T[][] = [], len = arr.length) {
-	if (len === 1) perms.push(arr.slice(0));
+function getFirstPermutation<T>(
+	arr: T[],
+	isValid: (players: T[]) => boolean,
+	perms: T[][] = [],
+	len = arr.length
+): T[] {
+	if (len === 1) {
+		let temp = arr.slice(0);
+		if (isValid(temp)) {
+			return temp;
+		}
+	}
 
 	for (let i = 0; i < len; i++) {
-		getPermutations(arr, perms, len - 1);
+		let temp = getFirstPermutation(arr, isValid, perms, len - 1);
+		if (temp) {
+			return temp;
+		}
 
 		len % 2 // parity dependent adjacent elements swap
 			? ([arr[0], arr[len - 1]] = [arr[len - 1], arr[0]])
 			: ([arr[i], arr[len - 1]] = [arr[len - 1], arr[i]]);
 	}
 
-	return perms;
+	return null;
 }
