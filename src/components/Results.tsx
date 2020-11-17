@@ -1,6 +1,7 @@
-import { Button, Card, Space, Table } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import { Button, Card, Dropdown, Menu, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
-import { findPlayer, playerIsEmpty } from "helpers";
+import { findPlayer, pairHasEmail, playerIsEmpty } from "helpers";
 import { IPair, IPlayer } from "interfaces";
 import React, { useEffect, useState } from "react";
 import shuffle from "shuffle-array";
@@ -23,11 +24,85 @@ export default function Results({
 	const [failed, setFailed] = useState(false);
 	const [matchups, setMatchups] = useState([] as IResultPair[]);
 	const [showAll, setShowAll] = useState(false);
+	const [canEmailAll, setCanEmailAll] = useState(false);
 	const [recalculateCounter, setRecalculateCounter] = useState(0);
 
 	const toggleShowAll = () => {
 		setShowAll(!showAll);
 	};
+
+	const exportToFile = () => {
+		try {
+			let j = document.createElement("a");
+			j.id = "download";
+			let dateString = new Date().toLocaleDateString("en-US", {
+				month: "numeric",
+				day: "numeric",
+				year: "numeric",
+			});
+			j.download = `secret_santa_${dateString}.json`;
+
+			let contents = {
+				version: 1.0,
+				people: players.filter((player) => !playerIsEmpty(player)),
+				bad_pairs: exclusions
+					.map((pair) => {
+						let a = findPlayer(players, pair.a);
+						let b = findPlayer(players, pair.b);
+						if (a && b) {
+							return [a.name, b.name];
+						} else {
+							return null;
+						}
+					})
+					.filter((pair) => pair),
+			};
+
+			j.href = URL.createObjectURL(
+				new Blob([JSON.stringify(contents, null, 2)])
+			);
+			j.click();
+			showToast("Exported successfully");
+		} catch (e) {
+			console.log(e);
+			return showErrorToast("Error exporting");
+		}
+	};
+
+	const getMenu = (pair?: IPair) => (
+		<Menu>
+			<Menu.Item key="0">
+				<a
+					onClick={() => {
+						if (pair) {
+							sendEmail(players, pair, EmailTarget.gmail);
+						} else {
+							for (let matchup of matchups) {
+								sendEmail(players, matchup, EmailTarget.gmail);
+							}
+						}
+					}}
+				>
+					Gmail
+				</a>
+			</Menu.Item>
+			<Menu.Item key="1">
+				<a
+					onClick={() => {
+						if (pair) {
+							sendEmail(players, pair, EmailTarget.local);
+						} else {
+							for (let matchup of matchups) {
+								sendEmail(players, matchup, EmailTarget.local);
+							}
+						}
+					}}
+				>
+					Local
+				</a>
+			</Menu.Item>
+		</Menu>
+	);
 
 	useEffect(() => {
 		let matchups = getMatchups(
@@ -37,6 +112,12 @@ export default function Results({
 		setMatchups(matchups);
 		setFailed(matchups.length === 0);
 	}, [players, exclusions, recalculateCounter]);
+
+	useEffect(() => {
+		setCanEmailAll(
+			!players.find((player) => !playerIsEmpty(player) && !player.email)
+		);
+	}, [players]);
 
 	return failed ? (
 		<Card>
@@ -55,70 +136,36 @@ export default function Results({
 	) : (
 		<>
 			<Card>
-				<Button
-					onClick={() => {
-						toggleShowResults();
-					}}
-				>
-					Edit
-				</Button>
-				<Button
-					onClick={() => {
-						setRecalculateCounter(recalculateCounter + 1);
-					}}
-				>
-					Recalculate
-				</Button>
-				<Button onClick={toggleShowAll}>
-					{showAll ? "Hide all" : "Show all"}
-				</Button>
+				<Space>
+					<Button
+						onClick={() => {
+							toggleShowResults();
+						}}
+					>
+						Edit
+					</Button>
+					<Button
+						onClick={() => {
+							setRecalculateCounter(recalculateCounter + 1);
+						}}
+					>
+						Recalculate
+					</Button>
+					<Button onClick={toggleShowAll}>
+						{showAll ? "Hide all" : "Show all"}
+					</Button>
+					<Dropdown
+						overlay={getMenu()}
+						trigger={["click"]}
+						disabled={!canEmailAll}
+					>
+						<Button onClick={(e) => e.preventDefault()}>
+							Email All <DownOutlined />
+						</Button>
+					</Dropdown>
 
-				<Button
-					onClick={() => {
-						for (let matchup of matchups) {
-							sendEmail(players, matchup);
-						}
-					}}
-				>
-					Email All
-				</Button>
-
-				<Button
-					onClick={() => {
-						try {
-							let j = document.createElement("a");
-							j.id = "download";
-							j.download = `secret_santa_${Date.now()}.json`;
-
-							let contents = {
-								version: 1.0,
-								people: players.filter((player) => !playerIsEmpty(player)),
-								bad_pairs: exclusions
-									.map((pair) => {
-										let a = findPlayer(players, pair.a);
-										let b = findPlayer(players, pair.b);
-										if (a && b) {
-											return [a.name, b.name];
-										} else {
-											return null;
-										}
-									})
-									.filter((pair) => pair),
-							};
-
-							j.href = URL.createObjectURL(
-								new Blob([JSON.stringify(contents, null, 2)])
-							);
-							j.click();
-							showToast("Exported successfully");
-						} catch (e) {
-							console.log(e);
-							return showErrorToast("Error exporting");
-						}
-					}}
-				>
-					Export
-				</Button>
+					<Button onClick={exportToFile}>Export</Button>
+				</Space>
 			</Card>
 			<Table dataSource={matchups} pagination={false} rowKey="id">
 				<Column
@@ -164,7 +211,15 @@ export default function Results({
 								</a>
 							)}
 
-							<a onClick={() => sendEmail(players, pair)}>Email</a>
+							<Dropdown
+								overlay={getMenu(pair)}
+								trigger={["click"]}
+								disabled={!pairHasEmail(players, pair)}
+							>
+								<Button onClick={(e) => e.preventDefault()}>
+									Email <DownOutlined />
+								</Button>
+							</Dropdown>
 						</Space>
 					)}
 				/>
@@ -173,15 +228,33 @@ export default function Results({
 	);
 }
 
-function sendEmail(players: IPlayer[], pair: IResultPair) {
+enum EmailTarget {
+	gmail,
+	local,
+}
+function sendEmail(players: IPlayer[], pair: IResultPair, target: EmailTarget) {
 	let a = findPlayer(players, pair.a);
 	let b = findPlayer(players, pair.b);
 	let email = encodeURIComponent(a.email);
 	let subject = encodeURIComponent("Secret Santa");
 	let body = encodeURIComponent(getBody(b.name, b.address));
 
-	let message = `mailto:${email}?subject=${subject}&body=${body}`;
-	window.location.href = message;
+	switch (target) {
+		case EmailTarget.local:
+			{
+				let url = `mailto:${email}?subject=${subject}&body=${body}`;
+				window.location.href = url;
+			}
+			break;
+		case EmailTarget.gmail:
+			{
+				let url = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+				window.open(url, "_blank");
+			}
+			break;
+		default:
+			return;
+	}
 }
 
 function getBody(recipientName: string, recipientAddress?: string) {

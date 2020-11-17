@@ -47,3 +47,9 @@ export function findPlayersForExclusionDropdown(players: IPlayer[], exclusions: 
 export function playerIsEmpty(player: IPlayer) {
 	return (!player) || (!player.name && !player.email);
 }
+
+export function pairHasEmail(players: IPlayer[], pair: IPair): boolean {
+	let a = findPlayer(players, pair.a);
+	let b = findPlayer(players, pair.b);
+	return !!(a && b && a.email && b.email);
+}

@@ -49,12 +49,3 @@ body {
 .exclude-column {
 	display: flex;
 }
-
-.floating-button {
-	/* float: right; */
-
-	/* position: fixed;
-	bottom: 2vh;
-	right: 50px;
-	z-index: 1000; */
-}

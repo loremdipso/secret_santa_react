@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Anchor, Button, Card, notification } from "antd";
+import { Anchor, Button, Card, notification, Space } from "antd";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";
@@ -103,15 +103,16 @@ function App() {
 					) : (
 						<>
 							<Card>
-								<Button
-									className="floating-button"
-									disabled={players.length < 3}
-									onClick={toggleShowResults}
-								>
-									Calculate
-								</Button>
+								<Space>
+									<Importer onImport={onImport} />
 
-								<Importer onImport={onImport} />
+									<Button
+										disabled={players.length < 3}
+										onClick={toggleShowResults}
+									>
+										Calculate
+									</Button>
+								</Space>
 							</Card>
 
 							<Exclusions

@@ -1,3 +1,4 @@
+import { DownOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Menu, Select, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
 import {
@@ -40,7 +41,7 @@ export default function Exclusions({
 			<Column
 				title="Excluding"
 				render={(player: IPlayer) => (
-					<div key={player.id} className="exclude-column">
+					<Space key={player.id}>
 						<ShowDropdown
 							players={findPlayersForExclusionDropdown(
 								players,
@@ -62,7 +63,7 @@ export default function Exclusions({
 								</Button>
 							)
 						)}
-					</div>
+					</Space>
 				)}
 			/>
 
@@ -106,7 +107,7 @@ function ShowDropdown({
 	return (
 		<Dropdown overlay={menu} disabled={disabled}>
 			<Button className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-				Exclude
+				Exclude <DownOutlined />
 			</Button>
 		</Dropdown>
 	);
