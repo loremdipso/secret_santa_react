@@ -15,6 +15,10 @@ export function findExclusionsForPlayer(players: IPlayer[], exclusions: IPair[],
 	return toExclude.filter((idToRemove) => findPlayer(players, idToRemove)).sort((a, b) => a - b);
 }
 
+export function findPlayerByName(players: IPlayer[], name: string) {
+	return players.find((player) => player.name === name);
+}
+
 export function findPlayer(players: IPlayer[], id: number) {
 	return players.find((player) => player.id === id);
 }

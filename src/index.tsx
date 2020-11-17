@@ -1,28 +1,16 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Anchor, Button, Card } from "antd";
+import { Anchor, Button, Card, notification } from "antd";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";
-import { IPair, IPlayer } from "interfaces";
+import { IImportFile, IPair, IPlayer } from "interfaces";
 import Exclusions from "components/Exclusions";
 import Results from "components/Results";
-import { playerIsEmpty } from "helpers";
-
-export const getPairId = (() => {
-	let pairId = 0;
-	return () => {
-		return pairId++;
-	};
-})();
-
-const getPlayerId = (() => {
-	let playerId = 0;
-	return () => {
-		return playerId++;
-	};
-})();
+import { findPlayerByName, playerIsEmpty } from "helpers";
+import Importer from "components/Importer";
+import { getPairId, getPlayerId, showErrorToast, showToast } from "utils";
 
 function App() {
 	const [players, setPlayers] = useState([] as IPlayer[]);
@@ -53,6 +41,11 @@ function App() {
 				(exclusion) => shouldRemove(exclusion.a) || shouldRemove(exclusion.b)
 			)
 		);
+	};
+
+	const onImport = (newPlayers: IPlayer[], newExclusions: IPair[]) => {
+		setPlayers(newPlayers);
+		setExclusions(newExclusions);
 	};
 
 	const removeExclusion = (a: number, b: number) => {
@@ -117,6 +110,8 @@ function App() {
 								>
 									Calculate
 								</Button>
+
+								<Importer onImport={onImport} />
 							</Card>
 
 							<Exclusions

@@ -4,6 +4,7 @@
 	"description": "secret santa generator",
 	"main": "index.js",
 	"dependencies": {
+		"@ant-design/icons": "^4.3.0",
 		"typescript": "^4.0.5"
 	},
 	"devDependencies": {

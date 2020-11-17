@@ -1,39 +1,29 @@
-export const DEBUG = false;
-export const RED_EYES_DURATION = 500; // ms
+import { notification } from "antd";
 
-export interface Point {
-	x: number,
-	y: number,
+export function showToast(message: string) {
+	notification.open({
+		message: message
+	});
 }
 
-export interface Rect {
-	x: number,
-	y: number,
-	height: number,
-	width: number,
+export function showErrorToast(message: string) {
+	notification.open({
+		message: "Error",
+		description: message,
+	});
 }
 
-export function getDistance(p1: Point, p2: Point): number {
-	return Math.sqrt(((p2.x - p1.x) ** 2) + ((p2.y - p1.y) ** 2));
-}
 
-export function drawPoint(context: CanvasRenderingContext2D, center: Point, color: string, radius: number) {
-	context.save();
-	context.beginPath();
-	context.fillStyle = color;
-	context.arc(center.x, center.y, radius, 0, 2 * Math.PI);
-	context.closePath();
-	context.fill();
-	context.restore();
-}
+export const getPairId = (() => {
+	let pairId = 0;
+	return () => {
+		return pairId++;
+	};
+})();
 
-export function drawRect(context: CanvasRenderingContext2D, rect: Rect, color: string, opacity: number = 1.0) {
-	context.save();
-	context.beginPath();
-	context.globalAlpha = opacity;
-	context.fillStyle = color;
-	context.fillRect(rect.x, rect.y, rect.width, rect.height);
-	context.closePath();
-	context.fill();
-	context.restore();
-}
+export const getPlayerId = (() => {
+	let playerId = 0;
+	return () => {
+		return playerId++;
+	};
+})();

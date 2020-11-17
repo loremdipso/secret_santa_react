@@ -11,3 +11,10 @@ export interface IPair {
 	b: number;
 	id: number;
 }
+
+
+export interface IImportFile {
+	version: number,
+	people: IPlayer[],
+	bad_pairs: string[][]
+}

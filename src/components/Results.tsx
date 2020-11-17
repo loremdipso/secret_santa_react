@@ -1,4 +1,3 @@
-import { getPairId } from "../index";
 import { Button, Card, Space, Table } from "antd";
 import Column from "antd/lib/table/Column";
 import { findPlayer, playerIsEmpty } from "helpers";
@@ -6,6 +5,7 @@ import { IPair, IPlayer } from "interfaces";
 import React, { useEffect, useState } from "react";
 import shuffle from "shuffle-array";
 import { validateLocaleAndSetLanguage } from "typescript";
+import { getPairId, showErrorToast, showToast } from "utils";
 
 interface IResultPair extends IPair {
 	visible?: boolean;
@@ -23,6 +23,7 @@ export default function Results({
 	const [failed, setFailed] = useState(false);
 	const [matchups, setMatchups] = useState([] as IResultPair[]);
 	const [showAll, setShowAll] = useState(false);
+	const [recalculateCounter, setRecalculateCounter] = useState(0);
 
 	const toggleShowAll = () => {
 		setShowAll(!showAll);
@@ -35,7 +36,7 @@ export default function Results({
 		);
 		setMatchups(matchups);
 		setFailed(matchups.length === 0);
-	}, [players, exclusions]);
+	}, [players, exclusions, recalculateCounter]);
 
 	return failed ? (
 		<Card>
@@ -61,6 +62,13 @@ export default function Results({
 				>
 					Edit
 				</Button>
+				<Button
+					onClick={() => {
+						setRecalculateCounter(recalculateCounter + 1);
+					}}
+				>
+					Recalculate
+				</Button>
 				<Button onClick={toggleShowAll}>
 					{showAll ? "Hide all" : "Show all"}
 				</Button>
@@ -73,6 +81,43 @@ export default function Results({
 					}}
 				>
 					Email All
+				</Button>
+
+				<Button
+					onClick={() => {
+						try {
+							let j = document.createElement("a");
+							j.id = "download";
+							j.download = `secret_santa_${Date.now()}.json`;
+
+							let contents = {
+								version: 1.0,
+								people: players.filter((player) => !playerIsEmpty(player)),
+								bad_pairs: exclusions
+									.map((pair) => {
+										let a = findPlayer(players, pair.a);
+										let b = findPlayer(players, pair.b);
+										if (a && b) {
+											return [a.name, b.name];
+										} else {
+											return null;
+										}
+									})
+									.filter((pair) => pair),
+							};
+
+							j.href = URL.createObjectURL(
+								new Blob([JSON.stringify(contents, null, 2)])
+							);
+							j.click();
+							showToast("Exported successfully");
+						} catch (e) {
+							console.log(e);
+							return showErrorToast("Error exporting");
+						}
+					}}
+				>
+					Export
 				</Button>
 			</Card>
 			<Table dataSource={matchups} pagination={false} rowKey="id">
