@@ -2,7 +2,8 @@ import { notification } from "antd";
 
 export function showToast(message: string) {
 	notification.open({
-		message: message
+		message: message,
+		placement: "bottomRight"
 	});
 }
 
@@ -10,6 +11,7 @@ export function showErrorToast(message: string) {
 	notification.open({
 		message: "Error",
 		description: message,
+		placement: "bottomRight"
 	});
 }
 

@@ -8,11 +8,42 @@ import "./public/styles.css";
 import { IPair, IPlayer } from "interfaces";
 import Exclusions from "components/Exclusions";
 import Results from "components/Results";
-import { playerIsEmpty } from "helpers";
+import { decrypt, playerIsEmpty } from "helpers";
 import Importer from "components/Importer";
 import { getPairId, getPlayerId } from "utils";
 
 function App() {
+	const urlParams = new URLSearchParams(window.location.search);
+	const secret = urlParams.get("secret");
+	if (secret) {
+		try {
+			let player = decrypt(decodeURIComponent(secret)) as IPlayer;
+			return <Display targetPlayer={player} />;
+		} catch (e) {
+			return <Card>Error decoding :(((</Card>;
+		}
+	} else {
+		return <Main />;
+	}
+}
+
+function Display({ targetPlayer }: { targetPlayer: IPlayer }) {
+	return (
+		<Layout>
+			<Header>{targetPlayer.name} needs a gift!</Header>
+
+			<Content>
+				<Card>
+					{targetPlayer.address
+						? `Address: ${targetPlayer.address}`
+						: "No address on file"}
+				</Card>
+			</Content>
+		</Layout>
+	);
+}
+
+function Main() {
 	const [players, setPlayers] = useState([] as IPlayer[]);
 	const [exclusions, setExclusions] = useState([] as IPair[]);
 	const [showResults, setShowResults] = useState(false);
@@ -40,7 +71,8 @@ function App() {
 		setPlayers(players.filter((player) => shouldRemove(player.id)));
 		setExclusions(
 			exclusions.filter(
-				(exclusion) => shouldRemove(exclusion.a) || shouldRemove(exclusion.b)
+				(exclusion) =>
+					shouldRemove(exclusion.a) || shouldRemove(exclusion.b)
 			)
 		);
 	};
@@ -84,8 +116,14 @@ function App() {
 		}
 
 		// make sure players always ends with an empty object
-		if (players.length === 0 || !playerIsEmpty(players[players.length - 1])) {
-			setPlayers([...players, { name: null, email: null, id: getPlayerId() }]);
+		if (
+			players.length === 0 ||
+			!playerIsEmpty(players[players.length - 1])
+		) {
+			setPlayers([
+				...players,
+				{ name: null, email: null, id: getPlayerId() },
+			]);
 		}
 	}, [players]);
 
@@ -121,8 +159,12 @@ function App() {
 									<Switch
 										onChange={() => setOneWay(!oneWay)}
 										checked={oneWay}
-										checkedChildren={<span>Exclude is one-way</span>}
-										unCheckedChildren={<span>Exclude goes both ways</span>}
+										checkedChildren={
+											<span>Exclude is one-way</span>
+										}
+										unCheckedChildren={
+											<span>Exclude goes both ways</span>
+										}
 									/>
 								</Space>
 							</Card>

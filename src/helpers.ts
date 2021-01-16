@@ -1,4 +1,27 @@
 import { IPair, IPlayer } from "interfaces";
+import SimpleCrypto from "simple-crypto-js";
+
+// we don't actually care about security, we just want some strings to not be
+// human-readable
+const simpleCrypto = new SimpleCrypto("not a real key");
+
+export function encrypt(data: any): string {
+	return simpleCrypto.encrypt(data);
+}
+
+export function decrypt(data: string): any {
+	return simpleCrypto.decrypt(data) as string;
+}
+
+export function cleanedObject(data: any): any {
+	let rv: any = {};
+	for (let key in data) {
+		if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+			rv[key] = data[key];
+		}
+	}
+	return rv;
+}
 
 export function findExclusionsForPlayer(players: IPlayer[], exclusions: IPair[], id: number, oneWay: boolean): number[] {
 	const toExclude = [];

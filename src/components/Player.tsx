@@ -19,7 +19,7 @@ export default function Player({
 				}
 			/>
 			<Input
-				placeholder="email"
+				placeholder="email (optional)"
 				value={player.email}
 				onChange={(event) =>
 					updatePlayer({ ...player, email: event.target.value })

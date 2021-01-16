@@ -43,8 +43,9 @@ export default function Exclusions({
 			<Column
 				title="Excluding"
 				render={(player: IPlayer) => (
-					<Space key={player.id}>
+					<Space key={player.id} className="temp">
 						<ShowDropdown
+							key={player.id}
 							players={findPlayersForExclusionDropdown(
 								players,
 								exclusions,
@@ -79,7 +80,10 @@ export default function Exclusions({
 				align="right"
 				render={(player, _, index) =>
 					index < players.length - 1 ? (
-						<Button onClick={() => removePlayer(player.id)} type="primary">
+						<Button
+							onClick={() => removePlayer(player.id)}
+							type="primary"
+						>
 							Remove
 						</Button>
 					) : (
@@ -112,7 +116,10 @@ function ShowDropdown({
 
 	return (
 		<Dropdown overlay={menu} disabled={disabled}>
-			<Button className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
+			<Button
+				className="ant-dropdown-link"
+				onClick={(e) => e.preventDefault()}
+			>
 				Exclude <DownOutlined />
 			</Button>
 		</Dropdown>

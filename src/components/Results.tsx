@@ -1,15 +1,29 @@
 import { DownOutlined } from "@ant-design/icons";
-import { Button, Card, Dropdown, Input, Menu, Space, Table } from "antd";
+import TextareaAutosize from "react-textarea-autosize";
+import { Button, Card, Dropdown, Input, Menu, Radio, Space, Table } from "antd";
+import TextArea from "antd/lib/input/TextArea";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import Column from "antd/lib/table/Column";
-import { findPlayer, pairHasEmail, playerIsEmpty } from "helpers";
+import {
+	cleanedObject,
+	encrypt,
+	findPlayer,
+	pairHasEmail,
+	playerIsEmpty,
+} from "helpers";
 import { IImportFile, IPair, IPlayer } from "interfaces";
 import React, { useEffect, useState } from "react";
 import shuffle from "shuffle-array";
-import { validateLocaleAndSetLanguage } from "typescript";
 import { getPairId, showErrorToast, showToast } from "utils";
 
 interface IResultPair extends IPair {
 	visible?: boolean;
+}
+
+enum DISPLAYS {
+	links,
+	links_raw,
+	email,
 }
 
 export default function Results({
@@ -32,6 +46,12 @@ export default function Results({
 	const [showAll, setShowAll] = useState(false);
 	const [canEmailAll, setCanEmailAll] = useState(false);
 	const [recalculateCounter, setRecalculateCounter] = useState(0);
+	const [matchupsString, setMatchupsString] = useState("");
+	const [displayMode, setDisplayMode] = useState(DISPLAYS.links);
+
+	useEffect(() => {
+		setMatchupsString(getMatchupsString(matchups, players));
+	}, [players, matchups]);
 
 	const toggleShowAll = () => {
 		setShowAll(!showAll);
@@ -100,10 +120,20 @@ export default function Results({
 				<a
 					onClick={() => {
 						if (pair) {
-							sendEmail(players, pair, subject, EmailTarget.gmail);
+							sendEmail(
+								players,
+								pair,
+								subject,
+								EmailTarget.gmail
+							);
 						} else {
 							for (let matchup of matchups) {
-								sendEmail(players, matchup, subject, EmailTarget.gmail);
+								sendEmail(
+									players,
+									matchup,
+									subject,
+									EmailTarget.gmail
+								);
 							}
 						}
 					}}
@@ -115,10 +145,20 @@ export default function Results({
 				<a
 					onClick={() => {
 						if (pair) {
-							sendEmail(players, pair, subject, EmailTarget.local);
+							sendEmail(
+								players,
+								pair,
+								subject,
+								EmailTarget.local
+							);
 						} else {
 							for (let matchup of matchups) {
-								sendEmail(players, matchup, subject, EmailTarget.local);
+								sendEmail(
+									players,
+									matchup,
+									subject,
+									EmailTarget.local
+								);
 							}
 						}
 					}}
@@ -155,8 +195,8 @@ export default function Results({
 				Edit
 			</Button>
 			<Card>
-				Sorry, I couldn't find any valid arrangements. You'll need to either
-				remove some restrictions or add more people to the pool.
+				Sorry, I couldn't find any valid arrangements. You'll need to
+				either remove some restrictions or add more people to the pool.
 			</Card>
 		</Card>
 	) : (
@@ -193,70 +233,150 @@ export default function Results({
 						disabled={!canEmailAll}
 					>
 						<Button onClick={(e) => e.preventDefault()}>
-							Email All <DownOutlined />
+							Email all <DownOutlined />
 						</Button>
 					</Dropdown>
+
+					<Radio.Group
+						value={displayMode}
+						onChange={(value) => {
+							setDisplayMode(value.target.value as DISPLAYS);
+						}}
+					>
+						<Radio.Button value={DISPLAYS.links}>
+							Links View
+						</Radio.Button>
+						<Radio.Button value={DISPLAYS.links_raw}>
+							Raw Links View
+						</Radio.Button>
+						<Radio.Button value={DISPLAYS.email}>
+							Email View
+						</Radio.Button>
+					</Radio.Group>
 
 					<Button onClick={exportToFile}>Export</Button>
 				</Space>
 			</Card>
-			<Table dataSource={matchups} pagination={false} rowKey="id">
-				<Column
-					title="Gifter"
-					width="50%"
-					render={(pair: IResultPair) => {
-						let player = findPlayer(players, pair.a);
-						return (
-							<div key={player.id}>
-								<div>{player.name}</div>
-							</div>
-						);
-					}}
-				/>
 
-				<Column
-					title="Giftee"
-					width="50%"
-					render={(pair: IResultPair) => (
-						<HiddenField
-							player={findPlayer(players, pair.b)}
-							show={showAll || pair.visible}
-						/>
-					)}
-				/>
+			{displayMode === DISPLAYS.links ? (
+				<Table
+					dataSource={matchups}
+					pagination={false}
+					rowKey="id"
+					className="fancy-table"
+				>
+					<Column
+						title="Gifter"
+						width="50%"
+						render={(pair: IResultPair) => {
+							let player = findPlayer(players, pair.a);
+							return (
+								<div key={player.id}>
+									<div>{player.name}</div>
+								</div>
+							);
+						}}
+					/>
 
-				<Column
-					title=""
-					align="right"
-					width="120px"
-					render={(pair: IResultPair) => (
-						<Space>
-							{showAll ? null : (
-								<a
-									onClick={() =>
-										helper(matchups, setMatchups, pair, {
-											...pair,
-											visible: !pair.visible,
-										})
-									}
+					<Column
+						title="Link"
+						width="50%"
+						render={(pair: IResultPair) => {
+							let target = findPlayer(players, pair.b);
+							let linkUrl = calculateLinkUrl(target);
+							if (displayMode === DISPLAYS.links) {
+								return (
+									<a href={linkUrl} target="_blank">
+										Link
+									</a>
+								);
+							}
+						}}
+					/>
+				</Table>
+			) : null}
+
+			{displayMode === DISPLAYS.links_raw ? (
+				<Card>
+					<CopyToClipboard
+						text={matchupsString}
+						onCopy={() => showToast("Copied!")}
+					>
+						<Button>Copy to Clipboard</Button>
+					</CopyToClipboard>
+					<TextareaAutosize
+						className="full-width"
+						style={{ width: "100%" }}
+						readOnly
+						value={matchupsString}
+					/>
+				</Card>
+			) : null}
+
+			{displayMode === DISPLAYS.email ? (
+				<Table dataSource={matchups} pagination={false} rowKey="id">
+					<Column
+						title="Gifter"
+						width="50%"
+						render={(pair: IResultPair) => {
+							let player = findPlayer(players, pair.a);
+							return (
+								<div key={player.id}>
+									<div>{player.name}</div>
+								</div>
+							);
+						}}
+					/>
+
+					<Column
+						title="Giftee"
+						width="50%"
+						render={(pair: IResultPair) => (
+							<HiddenField
+								player={findPlayer(players, pair.b)}
+								show={showAll || pair.visible}
+							/>
+						)}
+					/>
+
+					<Column
+						title=""
+						align="right"
+						width="120px"
+						render={(pair: IResultPair) => (
+							<Space>
+								{showAll ? null : (
+									<a
+										onClick={() =>
+											helper(
+												matchups,
+												setMatchups,
+												pair,
+												{
+													...pair,
+													visible: !pair.visible,
+												}
+											)
+										}
+									>
+										{pair.visible ? "Hide" : "Show"}
+									</a>
+								)}
+
+								<Dropdown
+									overlay={getMenu(pair)}
+									trigger={["click"]}
+									disabled={!pairHasEmail(players, pair)}
 								>
-									{pair.visible ? "Hide" : "Show"}
-								</a>
-							)}
-
-							<Dropdown
-								overlay={getMenu(pair)}
-								trigger={["click"]}
-								disabled={!pairHasEmail(players, pair)}
-							>
-								<Button onClick={(e) => e.preventDefault()}>
-									Email <DownOutlined />
-								</Button>
-							</Dropdown>
-						</Space>
-					)}
-				/>
-			</Table>
+									<Button onClick={(e) => e.preventDefault()}>
+										Email <DownOutlined />
+									</Button>
+								</Dropdown>
+							</Space>
+						)}
+					/>
+				</Table>
+			) : null}
 		</>
 	);
 }
@@ -374,7 +494,9 @@ function validMatchups(
 		let exclusion = exclusions.find(
 			(exclusion) =>
 				(matchup.a === exclusion.a && matchup.b === exclusion.b) ||
-				(!oneWay && matchup.a === exclusion.b && matchup.b === exclusion.a)
+				(!oneWay &&
+					matchup.a === exclusion.b &&
+					matchup.b === exclusion.a)
 		);
 
 		if (exclusion) {
@@ -410,4 +532,22 @@ function getFirstPermutation<T>(
 	}
 
 	return null;
+}
+
+function calculateLinkUrl(targetPlayer: IPlayer): string {
+	let url = new URL(location.pathname, location.href).href;
+	let clean = cleanedObject(targetPlayer);
+	let data = encrypt(clean);
+	return `${url}?secret=${encodeURIComponent(data)}`;
+}
+
+function getMatchupsString(matchups: IPair[], players: IPlayer[]): string {
+	return matchups
+		.map((pair) => {
+			let gifter = findPlayer(players, pair.a);
+			let giftee = findPlayer(players, pair.b);
+			let link = calculateLinkUrl(giftee);
+			return `${gifter.name}\n${link}`;
+		})
+		.join("\n\n");
 }

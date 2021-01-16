@@ -49,3 +49,8 @@ body {
 .exclude-column {
 	display: flex;
 }
+
+.temp {
+	display: flex;
+	flex-wrap: wrap;
+}
