@@ -219,13 +219,11 @@ export default function Results({
 					</Button>
 					<Button
 						onClick={() => {
+							showToast("Recalculated!");
 							setRecalculateCounter(recalculateCounter + 1);
 						}}
 					>
 						Recalculate
-					</Button>
-					<Button onClick={toggleShowAll}>
-						{showAll ? "Hide all" : "Show all"}
 					</Button>
 					<Dropdown
 						overlay={getMenu()}
@@ -314,68 +312,75 @@ export default function Results({
 			) : null}
 
 			{displayMode === DISPLAYS.email ? (
-				<Table dataSource={matchups} pagination={false} rowKey="id">
-					<Column
-						title="Gifter"
-						width="50%"
-						render={(pair: IResultPair) => {
-							let player = findPlayer(players, pair.a);
-							return (
-								<div key={player.id}>
-									<div>{player.name}</div>
-								</div>
-							);
-						}}
-					/>
+				<>
+					<Button onClick={toggleShowAll}>
+						{showAll ? "Hide all" : "Show all"}
+					</Button>
+					<Table dataSource={matchups} pagination={false} rowKey="id">
+						<Column
+							title="Gifter"
+							width="50%"
+							render={(pair: IResultPair) => {
+								let player = findPlayer(players, pair.a);
+								return (
+									<div key={player.id}>
+										<div>{player.name}</div>
+									</div>
+								);
+							}}
+						/>
 
-					<Column
-						title="Giftee"
-						width="50%"
-						render={(pair: IResultPair) => (
-							<HiddenField
-								player={findPlayer(players, pair.b)}
-								show={showAll || pair.visible}
-							/>
-						)}
-					/>
+						<Column
+							title="Giftee"
+							width="50%"
+							render={(pair: IResultPair) => (
+								<HiddenField
+									player={findPlayer(players, pair.b)}
+									show={showAll || pair.visible}
+								/>
+							)}
+						/>
 
-					<Column
-						title=""
-						align="right"
-						width="120px"
-						render={(pair: IResultPair) => (
-							<Space>
-								{showAll ? null : (
-									<a
-										onClick={() =>
-											helper(
-												matchups,
-												setMatchups,
-												pair,
-												{
-													...pair,
-													visible: !pair.visible,
-												}
-											)
-										}
+						<Column
+							title=""
+							align="right"
+							width="120px"
+							render={(pair: IResultPair) => (
+								<Space>
+									{showAll ? null : (
+										<a
+											onClick={() =>
+												helper(
+													matchups,
+													setMatchups,
+													pair,
+													{
+														...pair,
+														visible: !pair.visible,
+													}
+												)
+											}
+										>
+											{pair.visible ? "Hide" : "Show"}
+										</a>
+									)}
+
+									<Dropdown
+										overlay={getMenu(pair)}
+										trigger={["click"]}
+										disabled={!pairHasEmail(players, pair)}
 									>
-										{pair.visible ? "Hide" : "Show"}
-									</a>
-								)}
-
-								<Dropdown
-									overlay={getMenu(pair)}
-									trigger={["click"]}
-									disabled={!pairHasEmail(players, pair)}
-								>
-									<Button onClick={(e) => e.preventDefault()}>
-										Email <DownOutlined />
-									</Button>
-								</Dropdown>
-							</Space>
-						)}
-					/>
-				</Table>
+										<Button
+											onClick={(e) => e.preventDefault()}
+										>
+											Email <DownOutlined />
+										</Button>
+									</Dropdown>
+								</Space>
+							)}
+						/>
+					</Table>
+				</>
 			) : null}
 		</>
 	);

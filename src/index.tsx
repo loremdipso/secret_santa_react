@@ -147,14 +147,14 @@ function Main() {
 						<>
 							<Card>
 								<Space>
-									<Importer onImport={onImport} />
-
 									<Button
 										disabled={players.length < 3}
 										onClick={toggleShowResults}
 									>
 										Calculate
 									</Button>
+
+									<Importer onImport={onImport} />
 
 									<Switch
 										onChange={() => setOneWay(!oneWay)}
