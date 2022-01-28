@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Input } from "antd";
+import Input from "antd/lib/input";
 import { IPlayer } from "../interfaces";
 
 export default function Player({

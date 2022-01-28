@@ -49,7 +49,34 @@ module.exports = {
 			},
 			{
 				test: /\.(ts|tsx)$/,
-				loader: "ts-loader",
+				loader: "babel-loader",
+				exclude: /node_modules/,
+				options: {
+					plugins: [
+						// ['import', { libraryName: "antd", style: true }]
+						["import", { "libraryName": "antd", "libraryDirectory": "es", "style": true }, "ant"],
+						["import", {
+							"libraryName": "@ant-design/icons",
+							"libraryDirectory": "es/icons",
+							"camel2DashComponentName": false
+						}, "ant-design-icons"],
+
+						// ['import', {
+						// 	libraryName: '@ant-design/icons',
+						// 	libraryDirectory: '',
+						// 	camel2DashComponentName: false
+						// }]
+
+						// ['import',
+						// 	{
+						// 		"libraryName": "@ant-design/icons",
+						// 		"libraryDirectory": "es/icons",
+						// 		"camel2DashComponentName": false
+						// 	},
+						// 	"@ant-design/icons"
+						// ],
+					]
+				},
 			},
 			{
 				test: /\.(png|svg|ico|jpe?g|gif)$/i,

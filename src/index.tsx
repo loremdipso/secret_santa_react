@@ -1,7 +1,10 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
-import { Button, Card, Space, Switch } from "antd";
+import Button from "antd/lib/button";
+import Card from "antd/lib/card";
+import Space from "antd/lib/space";
+import Switch from "antd/lib/switch";
 import Layout, { Content, Header } from "antd/lib/layout/layout";
 import "antd/dist/antd.css";
 import "./public/styles.css";

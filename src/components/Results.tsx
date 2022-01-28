@@ -1,7 +1,13 @@
 import { DownOutlined } from "@ant-design/icons";
 import TextareaAutosize from "react-textarea-autosize";
-import { Button, Card, Dropdown, Input, Menu, Radio, Space, Table } from "antd";
-import TextArea from "antd/lib/input/TextArea";
+import Button from "antd/lib/button";
+import Card from "antd/lib/card";
+import Input from "antd/lib/input";
+import Radio from "antd/lib/radio";
+import Dropdown from "antd/lib/dropdown";
+import Menu from "antd/lib/menu";
+import Space from "antd/lib/space";
+import Table from "antd/lib/table";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Column from "antd/lib/table/Column";
 import {

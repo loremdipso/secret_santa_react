@@ -1,4 +1,5 @@
-import { Button, Upload } from "antd";
+import Button from "antd/lib/button";
+import Upload from "antd/lib/upload";
 import React from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { playerIsEmpty, findPlayerByName } from "helpers";

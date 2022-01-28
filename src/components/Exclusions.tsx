@@ -1,5 +1,9 @@
 import { DownOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Menu, Select, Space, Table } from "antd";
+import Button from "antd/lib/button";
+import Dropdown from "antd/lib/dropdown";
+import Menu from "antd/lib/menu";
+import Space from "antd/lib/space";
+import Table from "antd/lib/table";
 import Column from "antd/lib/table/Column";
 import {
 	findExclusionsForPlayer,
